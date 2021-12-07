@@ -75,7 +75,7 @@ void print_board_for_debug(Board *b) {
 
             printf("%s", piece_ch[abs(piece)]);
         }
-        puts("");
+        printf("\x1b[39m\n");
     }
 
     // ユーザーの持ち駒のプリント
