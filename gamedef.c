@@ -73,7 +73,7 @@ void print_board_for_debug(Board *b) {
                 printf("\x1b[39m");
             }
 
-            printf("%s", piece_ch[piece]);
+            printf("%s", piece_ch[abs(piece)]);
         }
         puts("");
     }
