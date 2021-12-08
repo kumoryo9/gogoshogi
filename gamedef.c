@@ -20,18 +20,26 @@
 #define OU    6
 #define NARI  8  // 例えば歩が成った場合は FU + NARI と書く
 
-typedef struct {         // 盤面を(持ち駒とセットで)入れておく構造体
-    int board[5][5];     // 盤面
-    int user_pieces[7];  // ユーザーの持ち駒
-    int ai_pieces[7];    // AIの持ち駒
+typedef struct {        // 盤面を(持ち駒とセットで)入れておく構造体
+    int board[5][5];    // 盤面
+    int user_stock[7];  // ユーザーの持ち駒
+    int ai_stock[7];    // AIの持ち駒
 } Board;
+
+typedef struct {     // 駒の移動を表す構造体
+    int from_stock;  // 持ち駒を打つ場合その種類、打たない場合0
+    int from_x;      // 既存の駒を動かす場合のもとの座標
+    int from_y;      // 持ち駒を打つ場合は何でも良い
+    int to_x;        // 駒の移動先の座標
+    int to_y;
+    int turn_over;   // 移動後に成るか否か
+} Action;
 
 
 /*****************************
  * ユーティリティー関数の定義
  *   - debug_print
  *   - print_board_for_debug
- *   - abort_game
  *****************************/
 
 void debug_print(const char *msg, ...) {
@@ -62,7 +70,7 @@ void print_board_for_debug(Board *b) {
     // 盤面のプリント
     puts("  ＡＢＣＤＥ");
     for (int i = 0; i < 5; ++i) {
-        printf("%d ", i + 1);
+        printf("%d ", 5 - i);
         for (int j = 0; j < 5; ++j) {
             int piece = b->board[i][j];
 
@@ -98,23 +106,6 @@ void print_board_for_debug(Board *b) {
 
     printf("\n\n");
 #endif  /* DEBUG_MODE */
-}
-
-void abort_game(const char *loser) {
-    // ゲームを強制終了する
-    // loser引数には敗者を文字列で指定し、その値は"ai"または"user"とする
-
-    debug_print("abort called.");
-
-    if (!strcmp(loser, "user")) {
-        puts("You Lose");
-    } else if (!strcmp(loser, "ai")) {
-        puts("You Win");
-    } else {
-        debug_print("unknown value of the argument loser: %s", loser);
-    }
-
-    exit(1);
 }
 
 
