@@ -7,6 +7,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#define DEBUG_MODE  // デバッグ時以外はコメントアウトすること！
+
 
 /************************
  * 定数および構造体の定義
@@ -90,7 +92,7 @@ void print_board_for_debug(Board *b) {
     puts("");
     printf("user: ");
     for (int piece = 0; piece < 7; ++piece) {
-        int count = b->user_pieces[piece];
+        int count = b->user_stock[piece];
         for (int i = 0; i < count; ++i)
             printf("%s", piece_ch[piece]);
     }
@@ -99,7 +101,7 @@ void print_board_for_debug(Board *b) {
     puts("");
     printf("ai  : ");
     for (int piece = 0; piece < 7; ++piece) {
-        int count = b->ai_pieces[piece];
+        int count = b->ai_stock[piece];
         for (int i = 0; i < count; ++i)
             printf("%s", piece_ch[piece]);
     }
