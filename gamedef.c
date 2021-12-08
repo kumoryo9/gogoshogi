@@ -42,6 +42,7 @@ typedef struct {     // 駒の移動を表す構造体
  * ユーティリティー関数の定義
  *   - debug_print
  *   - print_board_for_debug
+ *   - abort_game
  *****************************/
 
 void debug_print(const char *msg, ...) {
