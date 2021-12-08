@@ -61,12 +61,12 @@ void debug_print(const char *msg, ...) {
 
 void print_board_for_debug(Board *b) {
     // 盤面をプリントするデバッグ用の関数
-    // "NG"は成銀を、赤字は相手の駒を表す
+    // "全"は成銀を、赤字は相手の駒を表す
 
 #ifdef DEBUG_MODE
     static const char *piece_ch[] = {
             "　", "歩", "金", "銀", "角", "飛", "王",
-            "??", "??", "と", "??", "NG", "馬", "龍", "??",
+            "??", "??", "と", "??", "全", "馬", "龍", "??",
     };
 
     // 盤面のプリント
@@ -108,6 +108,24 @@ void print_board_for_debug(Board *b) {
 
     printf("\n\n");
 #endif  /* DEBUG_MODE */
+}
+
+void abort_game(const char *loser) {
+    // ゲームを強制終了する
+    // loser引数には"user"または"ai"を指定し、これは敗者を表す
+    // この関数はエラー時の強制終了に用いることが望ましい
+
+    debug_print("abort called.");
+
+    if (!strcmp(loser, "ai")) {
+        puts("You Win");
+    } else if (!strcmp(loser, "user")) {
+        puts("You Lose");
+    } else {
+        debug_print("unknown value of the argument loser: %s", loser);
+    }
+
+    exit(1);
 }
 
 
