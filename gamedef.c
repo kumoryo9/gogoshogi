@@ -22,10 +22,11 @@
 #define OU    6
 #define NARI  8  // 例えば歩が成った場合は FU + NARI と書く
 
-typedef struct {        // 盤面を(持ち駒とセットで)入れておく構造体
-    int board[5][5];    // 盤面
-    int user_stock[7];  // ユーザーの持ち駒
-    int ai_stock[7];    // AIの持ち駒
+typedef struct {              // 盤面を(持ち駒とセットで)入れておく構造体
+    int board[5][5];          // 盤面
+    int user_stock[7];        // ユーザーの持ち駒
+    int ai_stock[7];          // AIの持ち駒
+    const char* next_player;  // 次に駒を打つプレイヤー ("ai"または"user")
 } Board;
 
 typedef struct {     // 駒の移動を表す構造体
