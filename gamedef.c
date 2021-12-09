@@ -14,6 +14,9 @@
  * 定数および構造体の定義
  ************************/
 
+#define USER  0  // ユーザーとAIを表す定数を用意しておく
+#define AI    1
+
 #define FU    1
 #define KIN   2
 #define GIN   3
@@ -26,7 +29,7 @@ typedef struct {              // 盤面を(持ち駒とセットで)入れてお
     int board[5][5];          // 盤面
     int user_stock[7];        // ユーザーの持ち駒
     int ai_stock[7];          // AIの持ち駒
-    const char* next_player;  // 次に駒を打つプレイヤー ("ai"または"user")
+    int next_player;  // 次に駒を打つプレイヤー ( AI または USER )
 } Board;
 
 typedef struct {     // 駒の移動を表す構造体
@@ -112,19 +115,19 @@ void print_board_for_debug(Board *b) {
 #endif  /* DEBUG_MODE */
 }
 
-void abort_game(const char *loser) {
+void abort_game(int loser) {
     // ゲームを強制終了する
-    // loser引数には"user"または"ai"を指定し、これは敗者を表す
+    // loser引数には USER または AI を指定し、これは敗者を表す
     // この関数はエラー時の強制終了に用いることが望ましい
 
     debug_print("abort called.");
 
-    if (!strcmp(loser, "ai")) {
+    if (loser == AI) {
         puts("You Win");
-    } else if (!strcmp(loser, "user")) {
+    } else if (loser == USER) {
         puts("You Lose");
     } else {
-        debug_print("unknown value of the argument loser: %s", loser);
+        debug_print("unknown value of the argument loser: %d", loser);
     }
 
     exit(1);
