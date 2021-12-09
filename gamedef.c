@@ -14,8 +14,8 @@
  * 定数および構造体の定義
  ************************/
 
-#define USER  0  // ユーザーとAIを表す定数を用意しておく
-#define AI    1
+#define USER  1   // これらはユーザーとAIを表す定数であり、変更しない事とする
+#define AI    -1  // よって、これらの具体値に依存するコードを書いても良い
 
 #define FU    1
 #define KIN   2
@@ -25,11 +25,11 @@
 #define OU    6
 #define NARI  8  // 例えば歩が成った場合は FU + NARI と書く
 
-typedef struct {              // 盤面を(持ち駒とセットで)入れておく構造体
-    int board[5][5];          // 盤面
-    int user_stock[7];        // ユーザーの持ち駒
-    int ai_stock[7];          // AIの持ち駒
-    int next_player;  // 次に駒を打つプレイヤー ( AI または USER )
+typedef struct {        // 盤面を(持ち駒とセットで)入れておく構造体
+    int board[5][5];    // 盤面
+    int user_stock[7];  // ユーザーの持ち駒
+    int ai_stock[7];    // AIの持ち駒
+    int next_player;    // 次に駒を打つプレイヤー ( AI または USER )
 } Board;
 
 typedef struct {     // 駒の移動を表す構造体
