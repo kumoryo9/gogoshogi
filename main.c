@@ -14,9 +14,9 @@
 
 // debug_print関数を積極的に利用し、随所にエラーメッセージを散りばめること！
 
-Board create_board(int is_user_first) {
-    // Board型の盤面を作って初期化し、戻り値として返す
-    // is_user_firstが1ならユーザーが先手、0ならAIが先手
+Board create_board(int first_mover) {
+    // Board型の盤面を作って初期化し、それを戻り値として返す
+    // first_mover引数は先手を表し、USER か AI のいずれかである
 }
 
 Action get_user_action() {
@@ -26,13 +26,10 @@ Action get_user_action() {
     // となる。なお、この場合 a.from_x, a.from_y は何でも良い。
 }
 
-const char *move_piece(Board *b, Action action, const char *player) {
+void move_piece(Board *b, Action action) {
     // actionで示される行動をもとに、盤面bを変更する
-    // player引数には"ai"または"user"が指定され、これは現在駒を動かしているプレイヤーを表す
+    // actionは b->next_player で表されるプレイヤーの行動である
     // この関数内で、種々のエラーチェックを行うが、エラー毎にdebug_printを徹底すること！
-    // 駒を動かしたことにより決着がついた場合、勝者を表す文字列を返す
-    // 例えばユーザーが勝った場合、 return "user"; とする
-    // 勝敗が付いていなければ NULL を返す
     // 恐らくこの関数を書くのは大変 (課題のサイトの「反則手をさした場合」の項を参照)
     // さらに細分化する余地がありそう
 }
@@ -46,38 +43,19 @@ void display_action(Action action) {
     // actionの表す行動を、"2A3A"等の文字列に変換してプリントする
 }
 
-const char *is_game_over(Board *b, const char *next_player) {
-    // 盤面bと、次の打ち手next_playerを受け取り、next_playerが詰まされているか否かを判断する
-    // 戻り値として勝者を表す文字列 ("ai"または"user") を返す
-    // 例えば、next_player = "user" であったとし、ユーザーが詰みであるならば、"ai"を返す
-    // 恐らく、王手がかかっていなくても詰みになる状態がある (「必死」)
-    // つまり次の手として考えられる全てを列挙して、全てが王手状態であれば詰みかと思われる
+int is_game_over(Board *b) {
+    // 盤面bを受け取り、 b->next_player で表される次のプレイヤーが詰まされているか否かを判断する
+    // 戻り値として勝者を表す整数 (AI または USER) を返し、勝敗が付いていなければ0を返す
+    // 例えば、 b->next_player = USER であったとし、ユーザーが詰みであるならば、AI を返す
+    // 王手がかかっていなくても詰みになる状態がある (「ステイルメイト」) が、
+    // ステイルメイトの場合は次のターンに自動的に相手が反則負けになるので、この関数では
+    // 王手がかかっている状況のみを考えればよい
 }
 
 
-/*****************************
- * 以下プログラムの本流
- *   - move_user_piece
- *   - move_ai_piece
- *   - main
- *****************************/
-
-void move_user_piece(Board *b) {
-    // ユーザーの行動を取ってきて駒を動かす
-
-    Action user_action = get_user_action();
-    move_piece(b, user_action, "user");
-    print_board_for_debug(b);
-}
-
-void move_ai_piece(Board *b) {
-    // AIの行動を取ってきて駒を動かし、その動きを標準出力にプリントする
-
-    Action ai_action = get_ai_action(b);
-    display_action(ai_action);
-    move_piece(b, ai_action, "ai");
-    print_board_for_debug(b);
-}
+/***********************************
+ * 以下プログラムの本流であるmain関数
+ ***********************************/
 
 int main(int argc, char *argv[]) {
     // 引数の個数をチェック
@@ -87,48 +65,46 @@ int main(int argc, char *argv[]) {
     }
 
     // 先手か後手か
-    int is_user_first;
+    int first_mover;
     if (!strcmp(argv[1], "0")) {
-        is_user_first = 1;
+        first_mover = USER;
     } else if (!strcmp(argv[1], "1")) {
-        is_user_first = 0;
+        first_mover = AI;
     } else {
         puts("invalid command line argument.");
         return -1;
     }
 
     // 初期化済みの盤面を作る
-    Board board = create_board(is_user_first);
+    Board board = create_board(first_mover);
     print_board_for_debug(&board);
 
     // ゲームのループをまわし、勝者を決める
-    const char *winner;
-    if (is_user_first) {
-        for (int i = 0; i < 150; i += 2) {  // 150手以内
-            move_user_piece(&board);  // ユーザー入力を受けて駒を動かす
-            if ((winner = is_game_over(&board, "ai")))
-                break;
+    int winner;
+    for (int i = 0; i < 150; ++i) {  // 150手以内
+        Action action;
 
-            move_ai_piece(&board);  // AIの判断を受けて駒を動かす
-            if ((winner = is_game_over(&board, "user")))
-                break;
+        if (board.next_player == USER) {
+            action = get_user_action();
+        } else if (board.next_player == AI) {
+            action = get_ai_action(&board);
+            display_action(action);
+        } else {
+            debug_print("ERROR: unknown player %d", board.next_player);
+            exit(1);
         }
-    } else {
-        for (int i = 0; i < 150; i += 2) {  // 以下同上
-            move_ai_piece(&board);
-            if ((winner = is_game_over(&board, "user")))
-                break;
 
-            move_user_piece(&board);
-            if ((winner = is_game_over(&board, "ai")))
-                break;
-        }
+        move_piece(&board, action);
+        print_board_for_debug(&board);
+
+        if ((winner = is_game_over(&board)))  // 勝敗が付いているかのチェック
+            break;
     }
 
     // 勝敗の表示
-    if (!strcmp(winner, "user")) {
+    if (winner == USER) {
         puts("You Win");
-    } else if (!strcmp(winner, "ai")) {
+    } else if (winner == AI) {
         puts("You Lose");
     } else {
         puts("Draw");
