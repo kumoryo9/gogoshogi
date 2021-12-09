@@ -1,6 +1,17 @@
 #include "gamedef.c"
 
 
+/*************************
+ * 未定義の関数群
+ * これから分担して実装する
+ *   - create_board
+ *   - get_user_action
+ *   - move_piece
+ *   - get_ai_action
+ *   - display_action
+ *   - is_game_over
+ *************************/
+
 // debug_print関数を積極的に利用し、随所にエラーメッセージを散りばめること！
 
 Board create_board(int is_user_first) {
@@ -35,6 +46,39 @@ void display_action(Action action) {
     // actionの表す行動を、"2A3A"等の文字列に変換してプリントする
 }
 
+const char *is_game_over(Board *b, const char *next_player) {
+    // 盤面bと、次の打ち手next_playerを受け取り、next_playerが詰まされているか否かを判断する
+    // 戻り値として勝者を表す文字列 ("ai"または"user") を返す
+    // 例えば、next_player = "user" であったとし、ユーザーが詰みであるならば、"ai"を返す
+    // 恐らく、王手がかかっていなくても詰みになる状態がある (「必死」)
+    // つまり次の手として考えられる全てを列挙して、全てが王手状態であれば詰みかと思われる
+}
+
+
+/*****************************
+ * 以下プログラムの本流
+ *   - move_user_piece
+ *   - move_ai_piece
+ *   - main
+ *****************************/
+
+void move_user_piece(Board *b) {
+    // ユーザーの行動を取ってきて駒を動かす
+
+    Action user_action = get_user_action();
+    move_piece(b, user_action, "user");
+    print_board_for_debug(b);
+}
+
+void move_ai_piece(Board *b) {
+    // AIの行動を取ってきて駒を動かし、その動きを標準出力にプリントする
+
+    Action ai_action = get_ai_action(b);
+    display_action(ai_action);
+    move_piece(b, ai_action, "ai");
+    print_board_for_debug(b);
+}
+
 int main(int argc, char *argv[]) {
     // 引数の個数をチェック
     if (argc != 2) {
@@ -54,41 +98,29 @@ int main(int argc, char *argv[]) {
     }
 
     // 初期化済みの盤面を作る
-    Board b = create_board(is_user_first);
-    print_board_for_debug(&b);
+    Board board = create_board(is_user_first);
+    print_board_for_debug(&board);
 
     // ゲームのループをまわし、勝者を決める
     const char *winner;
     if (is_user_first) {
         for (int i = 0; i < 150; i += 2) {  // 150手以内
-            // ユーザーの行動を取ってきて駒を動かす
-            Action user_action = get_user_action();
-            winner = move_piece(&b, user_action, "user");
-            print_board_for_debug(&b);
-            if (winner != NULL)  // 決着が付いているか？
+            move_user_piece(&board);  // ユーザー入力を受けて駒を動かす
+            if ((winner = is_game_over(&board, "ai")))
                 break;
 
-            // AIの行動を取ってきて駒を動かす
-            Action ai_action = get_ai_action(&b);
-            display_action(ai_action);
-            winner = move_piece(&b, ai_action, "ai");
-            print_board_for_debug(&b);
-            if (winner != NULL)  // 決着が付いているか？
+            move_ai_piece(&board);  // AIの判断を受けて駒を動かす
+            if ((winner = is_game_over(&board, "user")))
                 break;
         }
     } else {
         for (int i = 0; i < 150; i += 2) {  // 以下同上
-            Action ai_action = get_ai_action(&b);
-            display_action(ai_action);
-            winner = move_piece(&b, ai_action, "ai");
-            print_board_for_debug(&b);
-            if (winner != NULL)
+            move_ai_piece(&board);
+            if ((winner = is_game_over(&board, "user")))
                 break;
 
-            Action user_action = get_user_action();
-            winner = move_piece(&b, user_action, "user");
-            print_board_for_debug(&b);
-            if (winner != NULL)
+            move_user_piece(&board);
+            if ((winner = is_game_over(&board, "ai")))
                 break;
         }
     }
